@@ -3,7 +3,8 @@ import os
 
 # Get API key and ORCID from GitHub Secrets
 ADS_API_KEY = os.getenv("ADS_API_KEY")
-ORCID_ID = os.getenv("ORCID_ID")
+#ORCID_ID = os.getenv("ORCID_ID")
+ORCID_ID = "0000-0001-6534-6246"
 LIBRARY_ID = "jtVFaJEgTa-f_8rDodxeJg"
 LEAD_AUTHOR_LIBRARY_ID = "ZGzLvEG9RgWI9xHL25CByw"
 
