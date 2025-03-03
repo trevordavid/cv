@@ -69,5 +69,5 @@ jobs:
           git config --global user.email "actions@github.com"
           git add cv.pdf
           git commit -m "Updated CV metrics and regenerated CV PDF" || exit 0
-          git remote set-url origin https://${GH_PAT}@github.com/trevordavid/cv.git
-          git push
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/trevordavid/cv.git
+          git push origin main
