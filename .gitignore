@@ -1,0 +1,7 @@
+#Ignore auxiliary LaTeX files
+cv/cv.aux
+cv/cv.log
+cv/cv.out
+cv/cv.pdf
+#Ignore private information
+cv/private_info.tex
