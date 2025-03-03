@@ -1,0 +1,134 @@
+\documentclass[margin,line]{res}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[xetex,                %%% hyper-references for pdflatex
+bookmarks=true,                    %%% generate bookmarks ...
+bookmarksnumbered=true,            %%% ... with numbers
+colorlinks=true,            % links are colored
+citecolor=MidnightBlue,         % green   % color of cite links
+pagecolor=MidnightBlue,         % color of page links
+linkcolor=MidnightBlue,     %cyan,         % color of hyperref links
+menucolor=MidnightBlue,         % color of Acrobat Reader menu buttons
+urlcolor=MidnightBlue,       % color of page of \url{...}
+linkbordercolor={0 0 1},           %%% blue frames around links
+pdfborder= {0 0 1},
+frenchlinks=True]{hyperref}
+
+% Adjusting the font
+\usepackage{fontspec}
+\newfontfamily{\FA}[Path = Fonts/]{fontawesome-webfont}
+\usepackage{bbding}
+\defaultfontfeatures{Ligatures=TeX}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{graphicx}
+
+\def\faEnvelope{{\FA\symbol{"F0E0}}}
+\def\faGithub{{\FA\symbol{"F09B}}}
+\def\faDesktop{{\FA\symbol{"F108}}}
+\def\faPhone{{\FA\symbol{"F095}}}
+\def\faHandPointerO{{\FA\symbol{"F25A}}}
+\def\faMapMarker{{\FA\symbol{"F041}}}
+\def\faLinkedin{{\FA\symbol{"F08C}}}
+
+
+\setmainfont
+[Path=./Fonts/Caslon/,
+ItalicFont=ACaslonPro-Italic,
+BoldFont=ACaslonPro-Bold,
+BoldItalicFont=ACaslonPro-BoldItalic]
+{ACaslonPro-Regular.otf}
+
+
+\iffalse
+\setmainfont
+[Path=./Fonts/BertholdAkzidenzGrotesk/,
+ItalicFont=BertholdAkzidenzGrotesk-Italic,
+BoldFont=BertholdAkzidenzGrotesk-Bold,
+BoldItalicFont=BertholdAkzidenzGrotesk-BoldItalic]
+{BertholdAkzidenzGrotesk-Regular.otf}
+\fi 
+
+
+
+%\renewcommand{\baselinestretch}{0.95}
+
+
+\oddsidemargin -1.25in
+\evensidemargin -1.5in
+\topmargin -0.2in
+\textwidth=6.5in
+\textheight=9.in
+\itemsep=0in
+\parsep=0in
+
+%\def\aj{{AJ}}			% Astronomical Journal
+%\def\apj{{ApJ}}			% Astrophysical Journal
+%\def\Nature{{Nature}}			% Nature
+
+\newcommand{\email}{\getenv{EMAIL}}
+\newcommand{\phone}{\getenv{PHONE}}
+\newcommand{\aj}{\textit{The Astronomical Journal}}
+\newcommand{\apj}{\textit{The Astrophysical Journal}}
+\newcommand{\apjs}{\textit{The Astrophysical Journal Supplement}}
+\newcommand{\mnras}{\textit{Monthly Notices of the Royal Astronomical Society}}
+\newcommand{\nature}{\textit{Nature}}
+
+\newcommand\sbullet[1][.5]{\mathbin{\vcenter{\hbox{\scalebox{#1}{$\bullet$}}}}}
+%\newcommand\sbullet[1][.5]{\mathbin{\scalebox{#1}{$\bullet$}}}
+
+\newenvironment{list1}{
+  \begin{list}{\ding{113}}{%
+      \setlength{\itemsep}{0in}
+      \setlength{\parsep}{0in} \setlength{\parskip}{0in}
+      \setlength{\topsep}{0in} \setlength{\partopsep}{0in} 
+      \setlength{\leftmargin}{0.17in}}}{\end{list}}
+\newenvironment{list2}{
+  \begin{list}{$\bullet$}{%
+      \setlength{\itemsep}{0.02in}
+      \setlength{\parsep}{0in} \setlength{\parskip}{0in}
+      \setlength{\topsep}{0in} \setlength{\partopsep}{0in} 
+      \setlength{\leftmargin}{0.2in}}}{\end{list}}
+\newenvironment{list2b}{
+  \begin{enumerate}{%
+      \setlength{\itemsep}{-0.2in}
+      \setlength{\parsep}{-0.2in} \setlength{\parskip}{-0.2in}
+      \setlength{\topsep}{0in} \setlength{\partopsep}{-0.2in} 
+      \setlength{\leftmargin}{0.2in}}}{\end{enumerate}}
+\newenvironment{list3}{
+  \begin{list}{}{%
+      \setlength{\itemsep}{0.08in}
+      \setlength{\parsep}{0in} \setlength{\parskip}{0in}
+      \setlength{\topsep}{0in} \setlength{\partopsep}{0in} 
+      \setlength{\leftmargin}{0.17in}}}{\end{list}}
+
+
+\usepackage{titlesec}
+\titlespacing\section{0pt}{0pt plus 4pt minus 2pt}{-6 pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+
+\begin{document}
+\pagestyle{plain}
+\begin{resume}
+
+\input{sections/private_info}
+\input{sections/header}
+\input{sections/contact}
+\input{sections/education}
+\input{sections/experience}
+\input{sections/skills}
+\input{sections/research}
+\input{sections/awards}
+\input{sections/grants}
+\input{sections/telescope}
+\input{sections/talks-invited}
+\input{sections/talks-contributed}
+\input{sections/teaching}
+\input{sections/advising}
+\input{sections/service}
+\input{sections/media}
+\input{sections/publications}
+\input{sections/references}
+
+\end{resume}
+\end{document}
