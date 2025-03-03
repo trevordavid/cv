@@ -61,6 +61,17 @@ jobs:
           name: cv-pdf
           path: output/cv.pdf
 
+      - name: Check Repository Permissions
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          curl -H "Authorization: token ${GH_PAT}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/trevordavid/cv
+
+      - name: Debug Git Remote URL
+        run: git remote -v
+  
       - name: Commit and push if changed
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
