@@ -177,12 +177,18 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-
-          git fetch origin main  # Fetch latest changes
-          git reset origin/main  # Sync with remote without overwriting local changes
-
+  
+          git fetch origin main  # Ensure latest changes are fetched
+  
+          # Stash uncommitted changes before resetting
+          git stash
+  
+          git reset --hard origin/main  # Forcefully sync with the latest remote state
+  
+          # Reapply stashed changes (if any)
+          git stash pop || echo "No changes to reapply"
+  
           git add cv.pdf
           git commit -m "Updated CV metrics and regenerated CV PDF" || echo "No changes to commit"
-
-          git pull --rebase origin main  # Pull latest changes and reapply commits
+  
           git push origin main
