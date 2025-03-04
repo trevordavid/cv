@@ -48,9 +48,6 @@ jobs:
         run: |
             echo '\newcommand{\myPhone}{'"$PHONE"'}' > sections/private_info.tex
             echo '\newcommand{\myEmail}{'"$EMAIL"'}' >> sections/private_info.tex
-            
-      - name: Ensure Output Directory Exists
-        run: mkdir -p output
     
       - name: Compile LaTeX CV
         run: |
@@ -65,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cv-pdf
-          path: output/cv.pdf  # Make sure this path is correct
+          path: cv.pdf
 
       - name: Check Repository Permissions
         env:
@@ -89,6 +86,6 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add output/cv.pdf 
+          git add cv.pdf 
           git commit -m "Updated CV metrics and regenerated CV PDF" || exit 0
           git push origin main
