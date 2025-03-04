@@ -25,7 +25,7 @@ This repository hosts my CV, which is automatically updated with my latest citat
 ### **Download the Latest Compiled CV**
 You can always download the most up-to-date version of my CV from the **GitHub Actions artifacts** or via the latest release:
 
-🔗 **[Download Latest CV](https://github.com/trevordavid/cv/releases/latest)**  
+🔗 **[Download Latest CV](https://github.com/trevordavid/cv/cv.pdf)**  
 
 ## **Security Considerations**
 - `private_info.tex` is **not** tracked in Git to protect personal details.
