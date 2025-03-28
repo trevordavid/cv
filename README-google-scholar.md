@@ -1,14 +1,19 @@
-# Publication Metrics Integration
+# Hybrid Publication Metrics Integration
 
-This branch adds support for retrieving citation metrics from both NASA ADS API and Google Scholar.
+This branch adds a hybrid approach for retrieving citation metrics, leveraging the strengths of both NASA ADS API and Google Scholar.
+
+## Hybrid Approach
+
+- **First Author Metrics**: NASA ADS API (more accurate for lead author detection)
+- **Overall Citations & Metrics**: Google Scholar (broader coverage across disciplines)
 
 ## Changes
 
-- Added dual API support with command-line options to switch between sources
-- Maintained original NASA ADS API integration for reliable lead author detection
-- Added Google Scholar integration via the `scholarly` Python library
-- Improved automatic lead author detection for Google Scholar data
-- Added robust fallback mechanisms when data is incomplete
+- Added hybrid approach that combines the best of both APIs
+- Maintained NASA ADS for lead author paper detection via custom libraries
+- Added Google Scholar integration for overall citation metrics
+- Added command-line options to switch between API sources
+- Updated GitHub Actions workflow to use the hybrid approach by default
 
 ## Setup
 
@@ -28,10 +33,13 @@ This branch adds support for retrieving citation metrics from both NASA ADS API 
 
 3. Run the update script:
    ```
-   # Using NASA ADS API (default)
+   # Using the hybrid approach (default)
+   python update_metrics.py --api hybrid
+   
+   # Using only NASA ADS API
    python update_metrics.py --api ads
    
-   # Using Google Scholar
+   # Using only Google Scholar
    python update_metrics.py --api google_scholar
    ```
 
@@ -45,12 +53,12 @@ This branch adds support for retrieving citation metrics from both NASA ADS API 
 - **Pros**: Broader coverage, no API key needed for basic usage, includes more citation sources
 - **Cons**: Limited by Google's scraping protections, less reliable author position detection
 
-## Lead Author Detection
-
-- **ADS**: Uses a dedicated library for lead author papers
-- **Google Scholar**: Uses a sample-based approach to determine the percentage of papers where you are first author
+### Hybrid (Default)
+- **Pros**: Gets the best of both worlds - accurate first author detection and broader citation coverage
+- **Cons**: Requires both APIs to be set up and working
 
 ## Notes
 
 - Google Scholar has no official API, and the `scholarly` package is a third-party library
-- Excessive use of the Google Scholar API may lead to rate limiting or CAPTCHA challenges 
+- Excessive use of the Google Scholar API may lead to rate limiting or CAPTCHA challenges
+- The GitHub Actions workflow is configured to use the hybrid approach by default 
