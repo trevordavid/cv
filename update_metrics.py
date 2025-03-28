@@ -3,7 +3,7 @@ from scholarly import scholarly
 
 # Get API key and ORCID from GitHub Secrets
 ORCID_ID = os.getenv("ORCID_ID", "0000-0001-6534-6246")
-GOOGLE_SCHOLAR_ID = os.getenv("GOOGLE_SCHOLAR_ID")
+GOOGLE_SCHOLAR_ID = os.getenv("GOOGLE_SCHOLAR_ID", "t12ArKcAAAAJ")
 
 if not GOOGLE_SCHOLAR_ID:
     print("Warning: Google Scholar ID not found in environment variables. Using profile search instead.")
