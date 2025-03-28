@@ -1,12 +1,14 @@
-# Google Scholar Integration
+# Publication Metrics Integration
 
-This branch replaces the NASA ADS API with Google Scholar for retrieving citation metrics and publication information.
+This branch adds support for retrieving citation metrics from both NASA ADS API and Google Scholar.
 
 ## Changes
 
-- Replaced ADS API integration with the `scholarly` Python library for Google Scholar
-- Updated the metrics calculation to use Google Scholar data
-- Modified lead author detection based on authorship order in Google Scholar data
+- Added dual API support with command-line options to switch between sources
+- Maintained original NASA ADS API integration for reliable lead author detection
+- Added Google Scholar integration via the `scholarly` Python library
+- Improved automatic lead author detection for Google Scholar data
+- Added robust fallback mechanisms when data is incomplete
 
 ## Setup
 
@@ -15,25 +17,40 @@ This branch replaces the NASA ADS API with Google Scholar for retrieving citatio
    pip install -r requirements.txt
    ```
 
-2. Set up environment variables:
-   - `GOOGLE_SCHOLAR_ID`: Your Google Scholar profile ID (optional but recommended)
-   - `ORCID_ID`: Your ORCID ID (used as fallback if Google Scholar ID is not provided)
-
-   You can find your Google Scholar ID in your profile URL: `https://scholar.google.com/citations?user=YOUR_ID_HERE`
+2. Set up environment variables in `.secrets` file or your environment:
+   ```
+   ADS_API_KEY=your_nasa_ads_api_key
+   GOOGLE_SCHOLAR_ID=your_google_scholar_id
+   ORCID_ID=your_orcid_id
+   ADS_LIBRARY_ID=your_ads_library_id
+   ADS_LEAD_AUTHOR_LIBRARY_ID=your_ads_lead_author_library_id
+   ```
 
 3. Run the update script:
    ```
-   python update_metrics.py
+   # Using NASA ADS API (default)
+   python update_metrics.py --api ads
+   
+   # Using Google Scholar
+   python update_metrics.py --api google_scholar
    ```
+
+## API Comparison
+
+### NASA ADS API
+- **Pros**: More accurate for academic papers, reliable lead author detection via custom libraries
+- **Cons**: Requires API key, primarily focused on astronomical publications
+
+### Google Scholar
+- **Pros**: Broader coverage, no API key needed for basic usage, includes more citation sources
+- **Cons**: Limited by Google's scraping protections, less reliable author position detection
+
+## Lead Author Detection
+
+- **ADS**: Uses a dedicated library for lead author papers
+- **Google Scholar**: Uses a sample-based approach to determine the percentage of papers where you are first author
 
 ## Notes
 
-- Google Scholar has no official API, and the `scholarly` package is a third-party library that scrapes data from Google Scholar
-- Excessive use may lead to rate limiting or CAPTCHA challenges from Google
-- For CI/CD deployments, consider using a proxy or implementing rate limiting to avoid blocks
-
-## Benefits
-
-- Wider coverage of publications compared to ADS
-- More commonly used citation metrics source in many fields
-- No API key needed for basic usage 
+- Google Scholar has no official API, and the `scholarly` package is a third-party library
+- Excessive use of the Google Scholar API may lead to rate limiting or CAPTCHA challenges 
