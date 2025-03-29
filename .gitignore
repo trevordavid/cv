@@ -25,3 +25,6 @@ missfont.log
 
 # Custom fonts (should be installed locally)
 /Fonts/BertholdAkzidenzGrotesk/
+
+# Generated files
+cv.pdf
