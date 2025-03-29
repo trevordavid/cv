@@ -4,3 +4,27 @@ cv/cv.log
 cv/cv.out
 #Ignore private information
 cv/sections/private_info.tex
+
+# Auxiliary LaTeX files
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.toc
+*.lof
+*.lot
+
+# Private information
+/sections/private_info.tex
+/.secrets
+
+# System files
+.DS_Store
+missfont.log
+
+# Custom fonts (should be installed locally)
+/Fonts/BertholdAkzidenzGrotesk/
+
+# Generated files
+cv.pdf
