@@ -87,18 +87,31 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          
+          # Get current branch name
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "Current branch: $CURRENT_BRANCH"
   
-          git fetch origin main  # Ensure latest changes are fetched
+          # Fetch the latest changes from the current branch
+          git fetch origin $CURRENT_BRANCH
   
           # Stash uncommitted changes before resetting
           git stash
   
-          git reset --hard origin/main  # Forcefully sync with the latest remote state
+          # Reset to the remote branch we're currently on
+          git reset --hard origin/$CURRENT_BRANCH
   
           # Reapply stashed changes (if any)
           git stash pop || echo "No changes to reapply"
   
-          git add cv.pdf
+          # Add the publication metrics changes first
+          git add sections/publication-metrics.tex
+          
+          # Force add the PDF file despite it being in .gitignore
+          git add -f cv.pdf
+          
+          # Commit the changes
           git commit -m "Updated CV metrics and regenerated CV PDF" || echo "No changes to commit"
   
-          git push origin main
+          # Push to the current branch
+          git push origin $CURRENT_BRANCH
