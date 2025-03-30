@@ -32,7 +32,8 @@ jobs:
       - name: Run update script to fetch metrics
         env:
           ADS_API_KEY: ${{ secrets.ADS_API_KEY }}
-        run: python update_metrics.py
+          GOOGLE_SCHOLAR_ID: ${{ secrets.GOOGLE_SCHOLAR_ID }}
+        run: python update_metrics.py --api hybrid
 
       - name: Install LaTeX (with XeLaTeX support)
         run: |
@@ -97,7 +98,13 @@ jobs:
           # Reapply stashed changes (if any)
           git stash pop || echo "No changes to reapply"
   
-          git add cv.pdf
+          # Add the publication metrics changes first
+          git add sections/publication-metrics.tex
+          
+          # Force add the PDF file despite it being in .gitignore
+          git add -f cv.pdf
+          
+          # Commit the changes
           git commit -m "Updated CV metrics and regenerated CV PDF" || echo "No changes to commit"
   
           git push origin main
