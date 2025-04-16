@@ -17,6 +17,7 @@ ORCID_ID = os.getenv("ORCID_ID", "0000-0001-6534-6246")
 GOOGLE_SCHOLAR_ID = os.getenv("GOOGLE_SCHOLAR_ID", "t12ArKcAAAAJ")
 ADS_API_KEY = os.getenv("ADS_API_KEY")
 
+
 # ADS library IDs
 ADS_LIBRARY_ID = os.getenv("ADS_LIBRARY_ID", "jtVFaJEgTa-f_8rDodxeJg")
 ADS_LEAD_AUTHOR_LIBRARY_ID = os.getenv("ADS_LEAD_AUTHOR_LIBRARY_ID", "ZGzLvEG9RgWI9xHL25CByw")
@@ -154,20 +155,53 @@ def get_hybrid_metrics():
         lead_author_citations = sum(int(pub.citation_count or 0) for pub in lead_publications)
         print(f"Found {lead_author_papers} lead author papers with {lead_author_citations} citations from NASA ADS")
         
+        # Get total papers from ADS library
+        total_query = ads.SearchQuery(
+            q=f"docs(library/{ADS_LIBRARY_ID})",
+            fl=["id", "citation_count", "title", "bibcode"],
+            fq=["property:refereed OR property:notrefereed"],
+            rows=2000
+        )
+        total_publications = list(total_query)
+        total_papers = len(total_publications)
+        print(f"Found {total_papers} total papers from NASA ADS")
+        
         # Get overall metrics from Google Scholar
         print("\nFetching overall metrics from Google Scholar...")
-        scholar_metrics = get_google_scholar_metrics()
-        
-        # Combine metrics
-        return {
-            "total_papers": scholar_metrics["total_papers"],
-            "total_citations": scholar_metrics["total_citations"],
-            "h_index": scholar_metrics["h_index"],
-            "g_index": scholar_metrics["g_index"],
-            "i10_index": scholar_metrics["i10_index"],
-            "lead_author_papers": lead_author_papers,
-            "lead_author_citations": lead_author_citations
-        }
+        try:
+            scholar_metrics = get_google_scholar_metrics()
+            return {
+                "total_papers": total_papers,  # Use ADS total papers count
+                "total_citations": scholar_metrics["total_citations"],
+                "h_index": scholar_metrics["h_index"],
+                "g_index": scholar_metrics["g_index"],
+                "i10_index": scholar_metrics["i10_index"],
+                "lead_author_papers": lead_author_papers,
+                "lead_author_citations": lead_author_citations
+            }
+        except Exception as e:
+            print(f"Error retrieving Google Scholar data: {e}")
+            print("Using ADS data for all metrics...")
+            # Calculate metrics from ADS data
+            citation_counts = sorted([int(pub.citation_count or 0) for pub in total_publications], reverse=True)
+            h_index = sum(c >= i + 1 for i, c in enumerate(citation_counts))
+            g_index, citation_sum = 0, 0
+            for i, c in enumerate(citation_counts, start=1):
+                citation_sum += c
+                if citation_sum >= i**2:
+                    g_index = i
+            i10_index = sum(c >= 10 for c in citation_counts)
+            total_citations = sum(citation_counts)
+            
+            return {
+                "total_papers": total_papers,
+                "total_citations": total_citations,
+                "h_index": h_index,
+                "g_index": g_index,
+                "i10_index": i10_index,
+                "lead_author_papers": lead_author_papers,
+                "lead_author_citations": lead_author_citations
+            }
     except Exception as e:
         print(f"Error with hybrid approach: {e}")
         print("Falling back to NASA ADS for all metrics...")
