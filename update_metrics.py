@@ -84,14 +84,18 @@ def get_ads_metrics():
 # Function to get metrics using Google Scholar
 def get_google_scholar_metrics():
     try:
+        print("Starting Google Scholar metrics fetch...")
         # Try to get author by ID if available
         if GOOGLE_SCHOLAR_ID:
+            print(f"Searching for author with ID: {GOOGLE_SCHOLAR_ID}")
             author = scholarly.search_author_id(GOOGLE_SCHOLAR_ID)
         else:
             # Search by name and ORCID
+            print(f"Searching for author with ORCID: {ORCID_ID}")
             search_query = scholarly.search_author(f"orcid:{ORCID_ID}")
             author = next(search_query)
         
+        print("Found author, filling details...")
         # Fill in all available details
         author = scholarly.fill(author)
         author_name = author.get('name', '')
@@ -106,6 +110,9 @@ def get_google_scholar_metrics():
         publications = author.get('publications', [])
         total_papers = len(publications)
         print(f"Total publications found: {total_papers}")
+        print(f"Total citations: {total_citations}")
+        print(f"h-index: {h_index}")
+        print(f"i10-index: {i10_index}")
 
         # Calculate g-index
         citation_counts = sorted([pub.get('num_citations', 0) for pub in publications], reverse=True)
@@ -114,6 +121,7 @@ def get_google_scholar_metrics():
             citation_sum += c
             if citation_sum >= i**2:
                 g_index = i
+        print(f"g-index: {g_index}")
         
         return {
             "total_papers": total_papers,
@@ -123,7 +131,11 @@ def get_google_scholar_metrics():
             "i10_index": i10_index
         }
     except Exception as e:
-        print(f"Error retrieving Google Scholar data: {e}")
+        print(f"Error retrieving Google Scholar data: {str(e)}")
+        print(f"Error type: {type(e).__name__}")
+        import traceback
+        print("Full traceback:")
+        print(traceback.format_exc())
         return {
             "total_papers": 0,
             "total_citations": 0,

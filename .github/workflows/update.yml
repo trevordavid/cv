@@ -24,7 +24,10 @@ jobs:
           python-version: "3.9"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install ads
+          pip list  # Show installed packages for debugging
 
       - name: Install missing dependencies
         run: pip install ads
@@ -33,7 +36,12 @@ jobs:
         env:
           ADS_API_KEY: ${{ secrets.ADS_API_KEY }}
           GOOGLE_SCHOLAR_ID: ${{ secrets.GOOGLE_SCHOLAR_ID }}
-        run: python update_metrics.py --api hybrid
+        run: |
+          echo "Running update_metrics.py with hybrid API..."
+          python -c "import scholarly; print('scholarly version:', scholarly.__version__)"
+          python update_metrics.py --api hybrid
+          echo "Checking publication-metrics.tex contents:"
+          cat sections/publication-metrics.tex
 
       - name: Install LaTeX (with XeLaTeX support)
         run: |
