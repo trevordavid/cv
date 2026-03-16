@@ -28,3 +28,4 @@ missfont.log
 
 # Generated files
 cv.pdf
+__pycache__/
