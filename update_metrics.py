@@ -1,5 +1,9 @@
-import ads
 import os
+import time
+
+import ads
+import requests
+from ads.exceptions import APIResponseError
 
 # Get API key and ORCID from GitHub Secrets
 ADS_API_KEY = os.getenv("ADS_API_KEY")
@@ -15,15 +19,60 @@ if not ORCID_ID:
 
 ads.config.token = ADS_API_KEY
 
+ADS_RETRY_ATTEMPTS = max(1, int(os.getenv("ADS_RETRY_ATTEMPTS", "4")))
+ADS_RETRY_BASE_DELAY_SECONDS = max(0.0, float(os.getenv("ADS_RETRY_BASE_DELAY_SECONDS", "5")))
+
+
+def is_retryable_ads_error(exc):
+    if isinstance(exc, requests.exceptions.RequestException):
+        return True
+
+    message = str(exc).lower()
+    retryable_markers = (
+        "429",
+        "500",
+        "502",
+        "503",
+        "504",
+        "bad gateway",
+        "gateway time-out",
+        "service unavailable",
+        "temporarily unavailable",
+        "timed out",
+    )
+    return any(marker in message for marker in retryable_markers)
+
+
+def fetch_publications(library_id):
+    last_error = None
+
+    for attempt in range(1, ADS_RETRY_ATTEMPTS + 1):
+        query = ads.SearchQuery(
+            q=f"docs(library/{library_id})",
+            fl=["id", "citation_count", "read_count", "downloads", "title", "bibcode"],
+            fq=["property:refereed OR property:notrefereed"],
+            rows=2000,
+        )
+
+        try:
+            return list(query)
+        except (APIResponseError, requests.exceptions.RequestException) as exc:
+            last_error = exc
+            if attempt == ADS_RETRY_ATTEMPTS or not is_retryable_ads_error(exc):
+                raise
+
+            delay_seconds = ADS_RETRY_BASE_DELAY_SECONDS * (2 ** (attempt - 1))
+            print(
+                f"Attempt {attempt}/{ADS_RETRY_ATTEMPTS} for library {library_id} failed: {exc}. "
+                f"Retrying in {delay_seconds:.1f}s."
+            )
+            time.sleep(delay_seconds)
+
+    raise last_error
+
 # Function to query ADS library and compute metrics
 def get_metrics(library_id):
-    query = ads.SearchQuery(
-        q=f"docs(library/{library_id})",
-        fl=["id", "citation_count", "read_count", "downloads", "title", "bibcode"],
-        fq=["property:refereed OR property:notrefereed"],
-        rows=2000
-    )
-    publications = list(query)
+    publications = fetch_publications(library_id)
     
     total_papers = len(publications)
     total_citations = sum(int(pub.citation_count or 0) for pub in publications)

@@ -14,12 +14,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Ensure full commit history for rebase
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "3.9"
 
@@ -32,8 +32,7 @@ jobs:
       - name: Run update script to fetch metrics
         env:
           ADS_API_KEY: ${{ secrets.ADS_API_KEY }}
-          GOOGLE_SCHOLAR_ID: ${{ secrets.GOOGLE_SCHOLAR_ID }}
-        run: python update_metrics.py --api hybrid
+        run: python update_metrics.py
 
       - name: Install LaTeX (with XeLaTeX support)
         run: |
@@ -58,7 +57,7 @@ jobs:
 
       - name: Upload CV PDF as Artifact
         if: ${{ env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cv-pdf
           path: cv.pdf
