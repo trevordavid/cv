@@ -26,6 +26,7 @@ missfont.log
 # Custom fonts (should be installed locally)
 /Fonts/BertholdAkzidenzGrotesk/
 
-# Generated files
-cv.pdf
+# Local environments and build intermediates (cv.pdf is intentionally tracked)
+.venv/
+build/
 __pycache__/

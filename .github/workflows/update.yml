@@ -2,108 +2,96 @@ name: Update CV Metrics and Generate PDF
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # Runs daily at midnight UTC
-  workflow_dispatch:  # Allows manual trigger
+    - cron: "0 0 * * *"  # Daily at midnight UTC (GitHub may delay scheduled runs).
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
 
 permissions:
-  contents: write  # Allows pushing changes to the repository
+  contents: read
+
+# Serialize publishers; never interrupt a run halfway through publication.
+concurrency:
+  group: cv-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  update-cv:
-    runs-on: ubuntu-latest
-
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          fetch-depth: 0  # Ensure full commit history for rebase
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: "3.9"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Install missing dependencies
-        run: pip install ads
-
-      - name: Run update script to fetch metrics
-        env:
-          ADS_API_KEY: ${{ secrets.ADS_API_KEY }}
-        run: python update_metrics.py
-
-      - name: Install LaTeX (with XeLaTeX support)
+          python-version-file: .python-version
+          cache: pip
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run regression tests (no credentials or network required)
+        run: python -m unittest discover -s tests -v
+      - name: Install LaTeX and PDF tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
+          sudo apt-get install -y --no-install-recommends texlive-xetex texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra poppler-utils
+      - name: Compile CV with example contact details
+        run: |
+          cp sections/private_info.template.tex sections/private_info.tex
+          bash scripts/build_cv.sh
 
-      - name: Create Private Info File
+  update-cv:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: .python-version
+          cache: pip
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Create contact information
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PHONE: ${{ secrets.PHONE }}
+        run: python scripts/write_private_info.py
+      - name: Fetch and validate current metrics
+        timeout-minutes: 5
+        env:
+          ADS_API_KEY: ${{ secrets.ADS_API_KEY }}
+        run: python update_metrics.py
+      - name: Install LaTeX and PDF tools
         run: |
-          echo '\newcommand{\myPhone}{'"$PHONE"'}' > sections/private_info.tex
-          echo '\newcommand{\myEmail}{'"$EMAIL"'}' >> sections/private_info.tex
-    
-      - name: Compile LaTeX CV
-        run: |
-          xelatex cv.tex
-          bibtex cv || true  # Run only if bibliography is present
-          xelatex cv.tex
-          xelatex cv.tex  # Run again for proper cross-referencing
-          rm -f *.aux *.log *.out *.bbl *.blg *.toc *.lof *.lot  # Cleanup temp files
-
-      - name: Upload CV PDF as Artifact
-        if: ${{ env.ACT != 'true' }}
-        uses: actions/upload-artifact@v6
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends texlive-xetex texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra poppler-utils
+      - name: Compile and validate the PDF
+        run: bash scripts/build_cv.sh
+      - name: Upload CV PDF
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: cv-pdf
           path: cv.pdf
-
-      - name: Check Repository Permissions
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          if-no-files-found: error
+          retention-days: 30
+      - name: Commit and push generated files
         run: |
-          curl -H "Authorization: token ${GH_PAT}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/trevordavid/cv
-
-      - name: Debug Git Remote URL
-        run: git remote -v
-
-      - name: Configure Git Remote with Authentication
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/trevordavid/cv.git
-          git remote -v  # Verify the remote URL
-
-      - name: Commit and push if changed
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-  
-          git fetch origin main  # Ensure latest changes are fetched
-  
-          # Stash uncommitted changes before resetting
-          git stash
-  
-          git reset --hard origin/main  # Forcefully sync with the latest remote state
-  
-          # Reapply stashed changes (if any)
-          git stash pop || echo "No changes to reapply"
-  
-          # Add the publication metrics changes first
-          git add sections/publication-metrics.tex
-          
-          # Force add the PDF file despite it being in .gitignore
-          git add -f cv.pdf
-          
-          # Commit the changes
-          git commit -m "Updated CV metrics and regenerated CV PDF" || echo "No changes to commit"
-  
-          git push origin main
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add sections/publication-metrics.tex cv.pdf
+          if git diff --cached --quiet; then
+            echo 'CV is already up to date.'
+            exit 0
+          fi
+          git commit -m 'Update CV metrics and regenerate PDF'
+          # A normal push rejects concurrent edits. Never rebase an old PDF
+          # onto newer sources or discard user changes to make a push succeed.
+          git push origin HEAD:main
+      - name: Remove generated contact information
+        if: always()
+        run: rm -f sections/private_info.tex
